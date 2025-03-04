@@ -14,8 +14,8 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
 
+sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
@@ -23,12 +23,13 @@ project = u'ggwd'
 copyright = u'2019, Timothy Gebhard & Niki Kilbertus'
 author = u'Timothy Gebhard & Niki Kilbertus'
 
+language = 'en'
+
 # The short X.Y version
 version = u'1.0'
 
 # The full version, including alpha/beta/rc tags
 release = u'1.0rc'
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -72,7 +73,6 @@ exclude_patterns = []
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -80,12 +80,10 @@ pygments_style = None
 #
 html_theme = 'sphinx_rtd_theme'
 
-
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'ggwddoc'
-
 
 # -- Options for LaTeX output ------------------------------------------------
 
@@ -95,7 +93,7 @@ latex_elements = {
     'papersize': 'a4paper',
 
     # Additional stuff for the LaTeX preamble.
-    'preamble': '\usepackage[utf8]{inputenc}',
+    'preamble': r'\usepackage[utf8]{inputenc}',
 
 }
 
@@ -104,13 +102,13 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'ggwd.tex', u'ggwd Documentation',
-     u'Timothy Gebhard \& Niki Kilbertus', 'manual'),
+     u'Timothy Gebhard & Niki Kilbertus', 'manual'),
 ]
 
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {'Python': ('https://docs.python.org/', None)}
 
 # -- Options for todo extension ----------------------------------------------
 

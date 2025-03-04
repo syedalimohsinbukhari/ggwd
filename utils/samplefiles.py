@@ -7,13 +7,13 @@ the sample generation.
 # IMPORTS
 # -----------------------------------------------------------------------------
 
-import numpy as np
-import pandas as pd
-import h5py
-
-from six import iteritems
 from pprint import pformat
 from warnings import warn
+
+import h5py
+import numpy as np
+import pandas as pd
+from six import iteritems
 
 
 # -----------------------------------------------------------------------------
@@ -80,7 +80,6 @@ class SampleFile:
             'data must be either dict or None!'
 
         if data is not None:
-
             assert 'command_line_arguments' in data.keys(), \
                 'data must provide key "command_line_arguments"!'
             assert 'static_arguments' in data.keys(), \
@@ -136,26 +135,23 @@ class SampleFile:
 
         with h5py.File(file_path, 'r') as hdf_file:
 
-            # Read in dict with command_line_arguments
-            self.data['command_line_arguments'] = \
-                dict(hdf_file['command_line_arguments'].attrs)
-            self.data['command_line_arguments'] = \
-                {key: value.decode('ascii') for key, value in
-                 iteritems(self.data['command_line_arguments'])}
+            # Read in dict with command_line_args
+            command_line_args = dict(hdf_file['command_line_arguments'].attrs)
+            command_line_args = {key: value.decode('ascii') if isinstance(value, bytes) else value
+                                 for key, value in command_line_args.items()}
+            self.data['command_line_arguments'] = command_line_args
 
             # Read in dict with static_arguments
-            self.data['static_arguments'] = \
-                dict(hdf_file['static_arguments'].attrs)
-            self.data['static_arguments'] = \
-                {key: value.decode('ascii') for key, value in
-                 iteritems(self.data['static_arguments'])}
+            static_arguments = dict(hdf_file['static_arguments'].attrs)
+            static_arguments = {key: value.decode('ascii') if isinstance(value, bytes) else value
+                                for key, value in static_arguments.items()}
+            self.data['static_arguments'] = static_arguments
 
             # Read in group containing injection samples
             self.data['injection_samples'] = dict()
             for key in ('event_time', 'h1_strain', 'l1_strain'):
                 try:
-                    self.data['injection_samples'][key] = \
-                        np.array(hdf_file['injection_samples'][key])
+                    self.data['injection_samples'][key] = np.array(hdf_file['injection_samples'][key])
                 except TypeError:
                     self.data['injection_samples'][key] = np.array(None)
 
@@ -163,8 +159,7 @@ class SampleFile:
             self.data['noise_samples'] = dict()
             for key in ('event_time', 'h1_strain', 'l1_strain'):
                 try:
-                    self.data['noise_samples'][key] = \
-                        np.array(hdf_file['noise_samples'][key])
+                    self.data['noise_samples'][key] = np.array(hdf_file['noise_samples'][key])
                 except TypeError:
                     self.data['noise_samples'][key] = np.array(None)
 
@@ -172,17 +167,14 @@ class SampleFile:
             self.data['injection_parameters'] = dict()
             for key in hdf_file['/injection_parameters'].keys():
                 try:
-                    self.data['injection_parameters'][key] = \
-                        np.array(hdf_file['injection_parameters'][key])
+                    self.data['injection_parameters'][key] = np.array(hdf_file['injection_parameters'][key])
                 except TypeError:
                     self.data['injection_parameters'][key] = np.array(None)
 
             # Read in dict with normalization parameters
-            self.data['normalization_parameters'] = \
-                dict(hdf_file['normalization_parameters'].attrs)
-            self.data['normalization_parameters'] = \
-                {key: float(value) for key, value in
-                 iteritems(self.data['normalization_parameters'])}
+            self.data['normalization_parameters'] = dict(hdf_file['normalization_parameters'].attrs)
+            self.data['normalization_parameters'] = {key: float(value) for key, value in
+                                                     iteritems(self.data['normalization_parameters'])}
 
     # -------------------------------------------------------------------------
 
@@ -283,26 +275,20 @@ class SampleFile:
         # Create a data frame for the samples containing an injection
         injection_samples = []
         if self.data['injection_samples']['event_time'].shape != ():
-            for i in range(len(self.data['injection_samples']['event_time'])):
-                _ = {k: v[i] for k, v in
-                     iteritems(self.data['injection_samples'])}
-                injection_samples.append(_)
-            df_injection_samples = pd.DataFrame().append(injection_samples,
-                                                         ignore_index=True,
-                                                         sort=True)
+            for index in range(len(self.data['injection_samples']['event_time'])):
+                temp_ = {key: value[index] for key, value in self.data['injection_samples'].items()}
+                injection_samples.append(temp_)
+            df_injection_samples = pd.DataFrame(injection_samples)
         else:
             df_injection_samples = pd.DataFrame()
 
         # Create a data frame for the samples not containing an injection
         noise_samples = []
         if self.data['noise_samples']['event_time'].shape != ():
-            for i in range(len(self.data['noise_samples']['event_time'])):
-                _ = {k: v[i] for k, v in
-                     iteritems(self.data['noise_samples'])}
-                noise_samples.append(_)
-            df_noise_samples = pd.DataFrame().append(noise_samples,
-                                                     ignore_index=True,
-                                                     sort=True)
+            for index in range(len(self.data['noise_samples']['event_time'])):
+                temp_ = {k: v[index] for k, v in self.data['noise_samples'].items()}
+                noise_samples.append(temp_)
+            df_noise_samples = pd.DataFrame(noise_samples)
         else:
             df_noise_samples = pd.DataFrame()
 
@@ -313,19 +299,13 @@ class SampleFile:
 
             # Check if we even have any injection parameters
             if self.data['injection_parameters']['mass1'].shape != ():
-                for i in range(len(df_injection_samples)):
-                    _ = {k: v[i] for k, v in
-                         iteritems(self.data['injection_parameters'])}
-                    injection_params.append(_)
-                df_injection_params = pd.DataFrame().append(injection_params,
-                                                            ignore_index=True,
-                                                            sort=True)
+                for index in range(df_injection_samples.shape[0]):  # Use DataFrame's number of rows
+                    temp_ = {key: value[index] for key, value in self.data['injection_parameters'].items()}
+                    injection_params.append(temp_)
+                df_injection_params = pd.DataFrame(injection_params)
             else:
                 df_injection_params = pd.DataFrame()
-
-            df = pd.concat([df_injection_samples, df_injection_params],
-                           axis=1, sort=True)
-
+            df = pd.concat([df_injection_samples, df_injection_params], axis=1)
         else:
             df = df_injection_samples
 
@@ -334,16 +314,12 @@ class SampleFile:
         # static_arguments also to the data frame containing the noise
         # samples (only those arguments that make sense there)
         if static_arguments:
-            for key, value in iteritems(self.data['static_arguments']):
+            for key, value in self.data['static_arguments'].items():
                 df[key] = value
-                if key in ('random_seed', 'target_sampling_rate',
-                           'bandpass_lower', 'bandpass_upper',
-                           'seconds_before_event', 'seconds_after_event',
-                           'sample_length'):
+                if key in ['random_seed', 'target_sampling_rate', 'bandpass_lower', 'bandpass_upper',
+                           'seconds_before_event', 'seconds_after_event', 'sample_length']:
                     df_noise_samples[key] = value
-
-        # Merge the data frames for the samples with and without injections
-        df = df.append(df_noise_samples, ignore_index=True, sort=True)
+        df = pd.concat([df, df_noise_samples], ignore_index=True)
 
         # If requested, add the command line arguments that were used in the
         # creation of the sample file to the combined data frame

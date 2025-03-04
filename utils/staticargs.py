@@ -33,7 +33,7 @@ def amend_static_args(static_args):
 
     # Create a copy of the original static_args
     args = copy.deepcopy(static_args)
-    
+
     # If necessary, compute the sample length
     if 'sample_length' not in args.keys():
         args['sample_length'] = \

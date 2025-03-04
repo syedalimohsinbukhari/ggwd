@@ -7,15 +7,12 @@ the sample generation process.
 # IMPORTS
 # -----------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import numpy as np
-
 from lal import LIGOTimeGPS
-from pycbc.psd import interpolate
-from pycbc.psd.analytical import aLIGOZeroDetHighPower
-from pycbc.noise import noise_from_psd
 from pycbc.filter import sigma
+from pycbc.noise import noise_from_psd
+from pycbc.psd import aLIGOZeroDetHighPower
+from pycbc.psd import interpolate
 
 from .hdffiles import get_strain_from_hdf_file
 from .waveforms import get_detector_signals, get_waveform
@@ -96,7 +93,6 @@ def generate_sample(static_arguments,
         # Actually generate the noise using the PSD and LALSimulation
         noise = dict()
         for i, det in enumerate(('H1', 'L1')):
-
             # Compute the length of the noise sample in time steps
             noise_length = noise_interval_width * target_sampling_rate
 
@@ -165,7 +161,6 @@ def generate_sample(static_arguments,
 
         # Calculate these quantities for both detectors
         for det in ('H1', 'L1'):
-
             # Add the simulated waveform into the noise to get the dummy strain
             strain_[det] = noise[det].add_into(detector_signals[det])
 
@@ -193,7 +188,6 @@ def generate_sample(static_arguments,
 
         strain = {}
         for det in ('H1', 'L1'):
-
             # Add the simulated waveform into the noise, using a scaling
             # factor to ensure that the resulting NOMF-SNR equals the chosen
             # injection SNR
@@ -210,7 +204,7 @@ def generate_sample(static_arguments,
                                 'l1_snr': snrs['L1']}
 
         # Also add the waveform parameters we have sampled
-        for key, value in waveform_params.iteritems():
+        for key, value in waveform_params.items():
             injection_parameters[key] = value
 
     # -------------------------------------------------------------------------
@@ -264,7 +258,6 @@ def generate_sample(static_arguments,
 
         # If we've made an injection, also cut the simulated signal
         if waveform_params is not None:
-
             # Cut the detector signals to the specified length
             detector_signals[det] = detector_signals[det].time_slice(a, b)
 

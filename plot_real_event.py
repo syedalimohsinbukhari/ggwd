@@ -6,24 +6,21 @@ Plot the (pre-processed) strains for a real GW event.
 # IMPORTS
 # -----------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import argparse
-import h5py
-import numpy as np
 import time
 
+import h5py
 import matplotlib
+import numpy as np
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt  # noqa
-
 
 # -----------------------------------------------------------------------------
 # MAIN CODE
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
-
     # -------------------------------------------------------------------------
     # Preliminaries
     # -------------------------------------------------------------------------
@@ -55,7 +52,7 @@ if __name__ == '__main__':
     print('Parsing command line arguments...', end=' ')
     command_line_arguments = vars(parser.parse_args())
     print('Done!')
-    
+
     # Create shortcuts to command line arguments
     delta_t = float(command_line_arguments['delta_t'])
     event = command_line_arguments['event']

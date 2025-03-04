@@ -6,15 +6,14 @@ This script simplifies downloading raw LIGO data from GWOSC.
 # IMPORTS
 # -----------------------------------------------------------------------------
 
-from __future__ import print_function
 
-import os
 import argparse
+import os
 import time
+
 import requests
 
 from utils.progressbar import ProgressBar
-
 
 # -----------------------------------------------------------------------------
 # MAIN CODE
@@ -109,7 +108,7 @@ if __name__ == '__main__':
 
         # Construct the URL to the JSON file containing the links to all files
         urlformat = 'https://gw-openscience.org/archive/links/' \
-            '{0}/{1}/{2}/{3}/json/'
+                    '{0}/{1}/{2}/{3}/json/'
         url = urlformat.format(observation_run, detector, gps_start_time,
                                gps_end_time)
 
@@ -117,7 +116,6 @@ if __name__ == '__main__':
         # JSON file which specifies the list of all HDF files so we have it
         # available later
         if not dry:
-
             print('Downloading JSON file for {} from URL...'
                   .format(detector), end=' ')
 

@@ -1,0 +1,17 @@
+name: ggwd
+channels:
+  - conda-forge
+dependencies:
+  - h5py
+  - lalsuite
+  - matplotlib
+  - numpy
+  - pandas
+  - pycbc
+  - requests
+  - scipy
+  - six
+  - tqdm
+  - sphinx
+  - sphinx-rtd-theme
+  - sphinxcontrib-napoleon

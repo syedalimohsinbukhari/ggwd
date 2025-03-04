@@ -7,16 +7,15 @@ generate synthetic GW data according to the provided specifications.
 # IMPORTS
 # -----------------------------------------------------------------------------
 
-from __future__ import print_function
 
 import argparse
-import numpy as np
 import os
 import sys
 import time
-
 from itertools import count
 from multiprocessing import Process, Queue
+
+import numpy as np
 from tqdm import tqdm
 
 from utils.configfiles import read_ini_config, read_json_config
@@ -40,14 +39,14 @@ def queue_worker(arguments, results_queue):
         results_queue (Queue): The queue to which the results of this
             worker / process are passed.
     """
-    
+
     # Try to generate a sample using the given arguments and store the result
     # in the given result_queue (which is shared across all worker processes).
     try:
         result = generate_sample(**arguments)
         results_queue.put(result)
         sys.exit(0)
-    
+
     # For some arguments, LALSuite crashes during the sample generation.
     # In this case, terminate with a non-zero exit code to make sure a new
     # set of argument is added to the main arguments_queue
@@ -66,7 +65,7 @@ if __name__ == '__main__':
     # -------------------------------------------------------------------------
 
     # Disable output buffering ('flush' option is not available for Python 2)
-    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
 
     # Start the stopwatch
     script_start = time.time()
@@ -74,7 +73,7 @@ if __name__ == '__main__':
     print('')
     print('GENERATE A GW DATA SAMPLE FILE')
     print('')
-    
+
     # -------------------------------------------------------------------------
     # Parse the command line arguments
     # -------------------------------------------------------------------------
@@ -98,7 +97,7 @@ if __name__ == '__main__':
     # Build the full path to the config file
     json_config_name = command_line_arguments['config_file']
     json_config_path = os.path.join('.', 'config_files', json_config_name)
-    
+
     # Read the JSON configuration into a dict
     print('Reading and validating in JSON configuration file...', end=' ')
     config = read_json_config(json_config_path)
@@ -182,8 +181,9 @@ if __name__ == '__main__':
                                              inj_bits=config['inj_bits'],
                                              return_paths=True)
                        for _ in iter(int, 1))
-        
+
         print('Done!\n')
+
 
     # -------------------------------------------------------------------------
     # Define a convenience function to generate arguments for the simulation
@@ -199,6 +199,7 @@ if __name__ == '__main__':
                     event_tuple=next(noise_times),
                     waveform_params=waveform_params)
 
+
     # -------------------------------------------------------------------------
     # Finally: Create our samples!
     # -------------------------------------------------------------------------
@@ -211,17 +212,17 @@ if __name__ == '__main__':
     # mostly the same; the only real difference is which arguments_generator
     # we have have to use:
     for sample_type in ('injection_samples', 'noise_samples'):
-    
+
         # ---------------------------------------------------------------------
         # Define some sample_type-specific shortcuts
         # ---------------------------------------------------------------------
-        
+
         if sample_type == 'injection_samples':
             print('Generating samples containing an injection...')
             n_samples = config['n_injection_samples']
             arguments_generator = \
                 (generate_arguments(injection=True) for _ in iter(int, 1))
-            
+
         else:
             print('Generating samples *not* containing an injection...')
             n_samples = config['n_noise_samples']
@@ -263,60 +264,59 @@ if __name__ == '__main__':
 
             # While we haven't produced as many results as desired, keep going
             while len(results_list) < n_samples:
-    
+
                 # -------------------------------------------------------------
                 # Loop over processes to see if anything finished or got stuck
                 # -------------------------------------------------------------
-                
+
                 for process_dict in list_of_processes:
-        
+
                     # Get the process object and its current runtime
                     process = process_dict['process']
                     runtime = time.time() - process_dict['start_time']
-        
+
                     # Check if the process is still running when it should
                     # have terminated already (according to max_runtime)
                     if process.is_alive() and (runtime > max_runtime):
-            
+
                         # Kill process that's been running too long
                         process.terminate()
                         process.join()
                         list_of_processes.remove(process_dict)
-            
+
                         # Add new arguments to queue to replace the failed ones
                         new_arguments = next(arguments_generator)
                         arguments_queue.put(new_arguments)
-        
+
                     # If process has terminated already
                     elif not process.is_alive():
-            
+
                         # If the process failed, add new arguments to queue
                         if process.exitcode != 0:
                             new_arguments = next(arguments_generator)
                             arguments_queue.put(new_arguments)
-            
+
                         # Remove process from the list of running processes
                         list_of_processes.remove(process_dict)
 
                 # -------------------------------------------------------------
                 # Start new processes if necessary
                 # -------------------------------------------------------------
-    
+
                 # Start new processes until the arguments_queue is empty, or
                 # we have reached the maximum number of processes
                 while (arguments_queue.qsize() > 0 and
                        len(list_of_processes) < config['n_processes']):
-                    
                     # Get arguments from queue and start new process
                     arguments = arguments_queue.get()
                     p = Process(target=queue_worker,
                                 kwargs=dict(arguments=arguments,
                                             results_queue=results_queue))
-        
+
                     # Remember this process and its starting time
                     process_dict = dict(process=p, start_time=time.time())
                     list_of_processes.append(process_dict)
-                    
+
                     # Finally, start the process
                     p.start()
 
@@ -334,7 +334,7 @@ if __name__ == '__main__':
 
                 # Sleep for some time before we check the processes again
                 time.sleep(0.5)
-            
+
         # ---------------------------------------------------------------------
         # Process results in the results_list
         # ---------------------------------------------------------------------
@@ -368,7 +368,7 @@ if __name__ == '__main__':
     # Stack recordings along first axis
     h1_samples = np.vstack(h1_samples)
     l1_samples = np.vstack(l1_samples)
-    
+
     # Compute the mean and standard deviation for both detectors as the median
     # of the means / standard deviations for each sample. This is more robust
     # towards outliers than computing "global" parameters by concatenating all
@@ -378,7 +378,7 @@ if __name__ == '__main__':
              l1_mean=np.median(np.mean(l1_samples, axis=1), axis=0),
              h1_std=np.median(np.std(h1_samples, axis=1), axis=0),
              l1_std=np.median(np.std(l1_samples, axis=1), axis=0))
-    
+
     print('Done!\n')
 
     # -------------------------------------------------------------------------

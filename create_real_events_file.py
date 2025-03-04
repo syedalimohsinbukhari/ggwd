@@ -8,18 +8,15 @@ band-passed) data for all merger events observed so far.
 # IMPORTS
 # -----------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import argparse
 import os
 import time
+
 import h5py
-
-from utils.configfiles import read_ini_config
-
 from pycbc.catalog import Catalog
 from pycbc.types.timeseries import TimeSeries
 
+from utils.configfiles import read_ini_config
 
 # -----------------------------------------------------------------------------
 # MAIN CODE
@@ -118,7 +115,7 @@ if __name__ == '__main__':
         # Get the strain for detectors H1 and L1 (if necessary, this will
         # download the  strain from GWOSC)
         strain = dict(H1=catalog[event].strain('H1'),
-                      L1=catalog[event].strain('L1'),)
+                      L1=catalog[event].strain('L1'), )
 
         # ---------------------------------------------------------------------
         # Re-sample to the desired target_sampling_rate
@@ -136,7 +133,7 @@ if __name__ == '__main__':
                 TimeSeries(initial_array=strain[det][::resampling_factor],
                            delta_t=1.0 / target_sampling_rate,
                            epoch=strain[det].start_time)
-        
+
         print('Done!')
 
         # ---------------------------------------------------------------------

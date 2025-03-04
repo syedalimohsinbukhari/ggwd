@@ -6,22 +6,15 @@ Plot the results produced by the generate_sample.py script.
 # IMPORTS
 # -----------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import argparse
-import numpy as np
 import os
 import sys
 import time
 
-from utils.samplefiles import SampleFile
-
-# We need to load a different backend for matplotlib before import plt to
-# avoid problems on environments where the $DISPLAY variable is not set.
-import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt  # noqa
+import numpy as np
 
+from utils.samplefiles import SampleFile
 
 # -----------------------------------------------------------------------------
 # MAIN CODE
@@ -34,7 +27,7 @@ if __name__ == '__main__':
     # -------------------------------------------------------------------------
 
     # Disable output buffering ('flush' option is not available for Python 2)
-    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
 
     # Start the stopwatch
     script_start_time = time.time()
@@ -92,8 +85,7 @@ if __name__ == '__main__':
     print('Reading in HDF file...', end=' ')
     data = SampleFile()
     data.read_hdf(hdf_file_path)
-    df = data.as_dataframe(injection_parameters=True,
-                           static_arguments=True)
+    df = data.as_dataframe(injection_parameters=True, static_arguments=True)
     print('Done!')
 
     # -------------------------------------------------------------------------
@@ -101,7 +93,7 @@ if __name__ == '__main__':
     # -------------------------------------------------------------------------
 
     print('Plotting sample...', end=' ')
-    
+
     # Select the sample (i.e., the row from the data frame of samples)
     try:
         sample = df.loc[sample_id]
@@ -128,6 +120,7 @@ if __name__ == '__main__':
 
     # Create subplots for H1 and L1
     fig, axes1 = plt.subplots(nrows=2)
+    fig.subplots_adjust(top=0.868, bottom=0.097, left=0.059, right=0.934, hspace=0.0, wspace=0.0)
 
     # If the sample has an injection, we need a second y-axis to plot the
     # pure (i.e., unwhitened) detector signals
@@ -139,7 +132,6 @@ if __name__ == '__main__':
     # Plot the strains for H1 and L1
     for i, (det_name, det_string) in enumerate([('H1', 'h1_strain'),
                                                 ('L1', 'l1_strain')]):
-
         axes1[i].plot(grid, sample[det_string], color='C0')
         axes1[i].set_xlim(-seconds_before, seconds_after)
         axes1[i].set_ylim(-150, 150)
@@ -165,14 +157,12 @@ if __name__ == '__main__':
 
     # Also add the injection parameters
     if has_injection:
-        keys = ('mass1', 'mass2', 'spin1z', 'spin2z', 'ra', 'dec',
-                'coa_phase', 'inclination', 'polarization', 'injection_snr')
-        string = ', '.join(['{} = {:.2f}'.format(_, float(sample[_]))
-                            for _ in keys])
+        keys = ['mass1', 'mass2', 'spin1z', 'spin2z', 'ra', 'dec',
+                'coa_phase', 'inclination', 'polarization', 'injection_snr']
+        string = ', '.join(['{} = {:.2f}'.format(_, float(sample[_])) for _ in keys])
     else:
         string = '(sample does not contain an injection)'
-    plt.figtext(0.5, 0.9, 'Injection Parameters:\n' + string,
-                fontsize=8, ha='center')
+    plt.figtext(0.5, 0.89, f'Injection Parameters:\n{string}', fontsize=8, ha='center')
 
     # Add a vertical line at the position of the event (x=0)
     axes1[0].axvline(x=0, color='black', ls='--', lw=1)
@@ -184,14 +174,12 @@ if __name__ == '__main__':
 
     # Adjust the size and spacing of the subplots
     plt.gcf().set_size_inches(12, 6, forward=True)
-    plt.tight_layout(rect=[0, 0, 1, 0.9])
-    plt.subplots_adjust(wspace=0, hspace=0)
 
     # Add a title
-    plt.suptitle('Sample #{}'.format(sample_id), y=0.975)
+    plt.suptitle(f'\nSample #{sample_id}', y=0.99)
 
     # Save the plot at the given location
-    plt.savefig(plot_path, bbox_inches='tight', pad_inches=0)
+    plt.savefig(plot_path)
 
     print('Done!')
 
