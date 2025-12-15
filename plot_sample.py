@@ -46,8 +46,8 @@ if __name__ == '__main__':
     parser.add_argument('--hdf-file-path',
                         help='Path to the HDF sample file (generated with '
                              'generate_sample.py) to be used. '
-                             'Default: ./output/training.hdf.',
-                        default='./output/training.hdf')
+                             'Default: ./output/training_seed42.hdf.',
+                        default='./output/training_seed42.hdf')
     parser.add_argument('--sample-id',
                         help='ID of the sample to be viewed (an integer '
                              'between 0 and n_injection_samples + '

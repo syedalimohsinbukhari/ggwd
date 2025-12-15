@@ -1,5 +1,5 @@
 {
-  "random_seed": 42,
+  "random_seed": 4442,
   "background_data_directory": null,
   "dq_bits": [0, 1, 2, 3],
   "inj_bits": [0, 1, 2, 4],
@@ -8,5 +8,5 @@
   "n_injection_samples": 100,
   "n_noise_samples": 100,
   "n_processes": 8,
-  "output_file_name": "training_seed42.hdf"
+  "output_file_name": "validation_seed4442.hdf"
 }

@@ -207,13 +207,13 @@ def get_waveform(static_arguments,
                                  coa_phase=waveform_params['coa_phase'],
                                  delta_f=static_arguments['delta_f'],
                                  delta_t=static_arguments['delta_t'],
-                                 distance=static_arguments['distance'],
+                                 distance=waveform_params['distance'],
                                  f_lower=static_arguments['f_lower'],
-                                 inclination=waveform_params['inclination'],
+                                 inclination=static_arguments['inclination'],
                                  mass1=waveform_params['mass1'],
                                  mass2=waveform_params['mass2'],
-                                 spin1z=waveform_params['spin1z'],
-                                 spin2z=waveform_params['spin2z'])
+                                 spin1z=static_arguments['spin1z'],
+                                 spin2z=static_arguments['spin2z'])
 
     # Perform the actual simulation with the given parameters
     h_plus, h_cross = simulate_waveform(**simulation_parameters)
@@ -272,7 +272,7 @@ def get_detector_signals(static_arguments,
     # Extract the parameters we will need later for the projection
     right_ascension = waveform_params['ra']
     declination = waveform_params['dec']
-    polarization = waveform_params['polarization']
+    polarization = static_arguments['polarization']
 
     # Store the detector signals we will get through projection
     detector_signals = {}
